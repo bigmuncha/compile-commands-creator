@@ -1,6 +1,6 @@
-# omar
+# This program create compile_commands.json for your smart text editor 
 
-FIXME: description
+You need write all your compile commands in defines.clj command variable (like include paths, and other)
 
 ## Installation
 
