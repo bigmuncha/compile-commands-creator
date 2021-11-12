@@ -4,7 +4,7 @@
             [cheshire.core :refer :all]
             [omar.defines ]))
 
-(generate-stream {:command "bar/ogpr" :baz 5} (clojure.java.io/writer "/tmp/foo" :append true))
+
 (defn read-path [ ]
   (str(read)))
 
@@ -12,7 +12,9 @@
   (-> directory clojure.java.io/file file-seq))
 
 (defn file-match [file-name substring]
-  (if (clojure.string/includes? file-name substring) true false))
+  (if (zero? (compare (-> substring reverse vec)
+              (->> file-name reverse (take (count substring)) vec))) true false))
+
 
 (defn create-command [command filename]
   (let [obj-file (->> filename reverse (drop 3 ) (cons \o )
@@ -24,18 +26,18 @@
     :command command
     :file file})
 
-(defn helper [filename]
-  (if (file-match filename ".cpp")
-    (my-json omar.defines/dir (create-command omar.defines/command filename)
+(defn helper [filename file-extension]
+  (if (file-match filename file-extension)
+    (my-json omar.defines/dir (create-command omar.defines/zebcommand filename)
              filename)
     nil))
 
 (defn my-main []
-  (loop [ file-list (get-file-list omar.defines/dir)
+  (loop [ file-list (get-file-list omar.defines/zebdir)
          json-list '() ]
     (if (empty? file-list) (filter #(not (nil? %)) json-list)
         (recur (rest file-list)
-               (cons (helper (str (first file-list)))
+               (cons (helper (str (first file-list)) ".c")
                      json-list)))))
 
  (defn  json-file-logger [bigfilename]
@@ -45,17 +47,9 @@
              (spit bigfilename ",\n" :append true)
              (recur (rest json-list))))))
     
-;; (defn json-print [json-list]
-;;   (loop [json-list json-list printer []]
-;;     (if
-;;         (empty? json-list) printer
-;;         (let [temp  (if (nil? (first json-list))
-;;                       "" (first json-list)))]
-;;           (recur (rest json-list ) (cons temp printer)))))
- 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (json-file-logger "/home/omar/omar.json"))
+  (json-file-logger "/home/omar/igor.json"))
 
 (-main)
