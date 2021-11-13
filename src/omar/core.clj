@@ -28,16 +28,16 @@
 
 (defn helper [filename file-extension]
   (if (file-match filename file-extension)
-    (my-json omar.defines/dir (create-command omar.defines/zebcommand filename)
+    (my-json omar.defines/freeradius-client-dir (create-command omar.defines/radius-commands filename)
              filename)
     nil))
 
 (defn my-main []
-  (loop [ file-list (get-file-list omar.defines/zebdir)
+  (loop [ file-list (get-file-list omar.defines/freeradius-client-dir)
          json-list '() ]
     (if (empty? file-list) (filter #(not (nil? %)) json-list)
         (recur (rest file-list)
-               (cons (helper (str (first file-list)) ".c")
+               (cons (helper (str (first file-list)) ".cpp")
                      json-list)))))
 
  (defn  json-file-logger [bigfilename]
