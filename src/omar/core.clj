@@ -26,22 +26,22 @@
     :command command
     :file file})
 
-(defn helper [filename file-extension]
+(defn helper [filename file-extension comp-list]
   (if (file-match filename file-extension)
-    (my-json omar.defines/freeradius-client-dir (create-command omar.defines/radius-commands filename)
+    (my-json (second comp-list) (create-command (first comp-list) filename)
              filename)
     nil))
 
-(defn my-main []
-  (loop [ file-list (get-file-list omar.defines/freeradius-client-dir)
+(defn my-main [comp-list]
+  (loop [ file-list (get-file-list (second comp-list))
          json-list '() ]
     (if (empty? file-list) (filter #(not (nil? %)) json-list)
         (recur (rest file-list)
-               (cons (helper (str (first file-list)) ".cpp")
+               (cons (helper (str (first file-list)) ".c" comp-list)
                      json-list)))))
 
- (defn  json-file-logger [bigfilename]
-   (loop [json-list (my-main)]
+ (defn  json-file-logger [bigfilename comp-list]
+   (loop [json-list (my-main comp-list)]
      (if (empty? json-list) nil
          (do (generate-stream (first json-list) (clojure.java.io/writer bigfilename :append true))
              (spit bigfilename ",\n" :append true)
@@ -50,6 +50,14 @@
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (json-file-logger "/home/omar/igor.json"))
+  (json-file-logger "/home/omar/igor.json" omar.defines/ecobus-commands))
 
 (-main)
+
+
+(defn merge-includes [inc-list]
+  (str " -I" (clojure.string/join " -I" inc-list)))
+
+(defn is-directory-have-include? [dir-name]
+  (not (empty? (filter #(file-match % ".h") (.list (clojure.java.io/file dir-name))))))
+
