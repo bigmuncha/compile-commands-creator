@@ -46,18 +46,39 @@
          (do (generate-stream (first json-list) (clojure.java.io/writer bigfilename :append true))
              (spit bigfilename ",\n" :append true)
              (recur (rest json-list))))))
-    
+
+(defn create-compile-command-json [root-dir commands-map]
+  )
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (json-file-logger "/home/omar/igor.json" omar.defines/ecobus-commands))
+  
+  (create-compile-command-json
+   (str (first args)) global
+   ))
+  ;(json-file-logger "/home/omar/igor.json" omar.defines/ecobus-commands))
 
-(-main)
+;;(-main)
 
 
 (defn merge-includes [inc-list]
   (str " -I" (clojure.string/join " -I" inc-list)))
+(defn merge-defines [def-list]
+  (str " -D" (clojure.string/join " -D" def-list)))
 
 (defn is-directory-have-include? [dir-name]
   (not (empty? (filter #(file-match % ".h") (.list (clojure.java.io/file dir-name))))))
 
+(defn create-command-str [global-struct filename]
+  (clojure.string/join " "
+                       (list
+                        (:compiler global-struct)
+                        (merge-includes (:includes global-struct))
+                        (merge-defines (:defines global-struct))
+                        (:flags global-struct)
+                        (:suffix global-struct )
+                        (str filename ".o" )
+                        filename
+                        )))
+(defn parse-project-root [project]
+  (get-file-list project(second)))

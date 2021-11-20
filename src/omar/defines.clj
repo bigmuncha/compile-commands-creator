@@ -30,4 +30,13 @@
     "/home/omar/ecotelecom/ecolog/app/src/"
      )
   )
+(def cpp-flags
+  " -std=gnu++17 -Wall -Wextra -Werror -Wno-error=deprecated-declarations -Wno-attributes ")
 
+(def global
+  {:compiler " g++ -c "
+   :flags cpp-flags
+   :defines '()
+   :includes common-include
+   :suffix " -o "
+   })
