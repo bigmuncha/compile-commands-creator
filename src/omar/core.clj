@@ -26,12 +26,6 @@
     :command command
     :file file})
 
-(defn helper [filename file-extension comp-list]
-  (if (file-match filename file-extension)
-    (my-json (second comp-list) (create-command (first comp-list) filename)
-             filename)
-    nil))
-
 (defn my-main [comp-list]
   (loop [ file-list (get-file-list (second comp-list))
          json-list '() ]
@@ -49,13 +43,13 @@
 
 (defn create-compile-command-json [root-dir commands-map]
   )
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
+;; (defn -main
+;;   "I don't do a whole lot ... yet."
+;;   [& args]
   
-  (create-compile-command-json
-   (str (first args)) global
-   ))
+;;   (create-compile-command-json
+;;    (str (first args)) global
+;;    ))
   ;(json-file-logger "/home/omar/igor.json" omar.defines/ecobus-commands))
 
 ;;(-main)
@@ -80,5 +74,25 @@
                         (str filename ".o" )
                         filename
                         )))
-(defn parse-project-root [project]
-  (get-file-list project(second)))
+(defn get-dir-list [project]
+  (filter #(.isDirectory %) (get-file-list project)))
+
+(defn get-include-list [dir-list]
+  (map str (filter #(is-directory-have-include? %) dir-list)))
+
+(defn final-get-include-list[project]
+(-> project  get-dir-list get-include-list))
+
+(defn create-global-struct [project]
+  {:compiler omar.defines/cppcompiler
+   :includes (final-get-include-list project)
+   :defines omar.defines/data-plane-defines
+   :flags omar.defines/cpp-flags
+   :suffix omar.defines/suffix
+   })
+
+(defn helper [filename file-extension comp-list]
+  (if (file-match filename file-extension)
+    (my-json (second comp-list) (create-command-str (first comp-list) filename)
+             filename) 
+    nil))
