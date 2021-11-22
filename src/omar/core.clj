@@ -1,12 +1,9 @@
 (ns omar.core
   (:gen-class)
-  (:require [clojure.data.json ]
+  (:require
             [cheshire.core :refer :all]
             [omar.defines ]))
 
-
-(defn read-path [ ]
-  (str(read)))
 
 (defn get-file-list [directory]
   (-> directory clojure.java.io/file file-seq))
@@ -15,53 +12,23 @@
   (if (zero? (compare (-> substring reverse vec)
               (->> file-name reverse (take (count substring)) vec))) true false))
 
-
-(defn create-command [command filename]
-  (let [obj-file (->> filename reverse (drop 3 ) (cons \o )
-                      reverse clojure.string/join)]
-    (str command " " obj-file " " filename)))
-
-(defn my-json [directory command file]
-     {:directory directory,
-    :command command
-    :file file})
-
-(defn my-main [comp-list]
-  (loop [ file-list (get-file-list (second comp-list))
-         json-list '() ]
-    (if (empty? file-list) (filter #(not (nil? %)) json-list)
-        (recur (rest file-list)
-               (cons (helper (str (first file-list)) ".c" comp-list)
-                     json-list)))))
-
- (defn  json-file-logger [bigfilename comp-list]
-   (loop [json-list (my-main comp-list)]
-     (if (empty? json-list) nil
-         (do (generate-stream (first json-list) (clojure.java.io/writer bigfilename :append true))
-             (spit bigfilename ",\n" :append true)
-             (recur (rest json-list))))))
-
-(defn create-compile-command-json [root-dir commands-map]
-  )
-;; (defn -main
-;;   "I don't do a whole lot ... yet."
-;;   [& args]
-  
-;;   (create-compile-command-json
-;;    (str (first args)) global
-;;    ))
-  ;(json-file-logger "/home/omar/igor.json" omar.defines/ecobus-commands))
-
-;;(-main)
-
-
 (defn merge-includes [inc-list]
   (str " -I" (clojure.string/join " -I" inc-list)))
 (defn merge-defines [def-list]
   (str " -D" (clojure.string/join " -D" def-list)))
-
 (defn is-directory-have-include? [dir-name]
   (not (empty? (filter #(file-match % ".h") (.list (clojure.java.io/file dir-name))))))
+
+(defn get-dir-list [project]
+  (filter #(.isDirectory %) (get-file-list project)))
+
+(defn get-include-list [dir-list]
+  (map str (filter #(is-directory-have-include? %) dir-list)))
+
+(defn final-get-include-list[project]
+  (concat
+   (-> project  get-dir-list get-include-list)
+   omar.defines/common-include))
 
 (defn create-command-str [global-struct filename]
   (clojure.string/join " "
@@ -74,14 +41,12 @@
                         (str filename ".o" )
                         filename
                         )))
-(defn get-dir-list [project]
-  (filter #(.isDirectory %) (get-file-list project)))
 
-(defn get-include-list [dir-list]
-  (map str (filter #(is-directory-have-include? %) dir-list)))
+(defn my-json [directory command file]
+     {:directory directory,
+      :command command
+      :file file})
 
-(defn final-get-include-list[project]
-(-> project  get-dir-list get-include-list))
 
 (defn create-global-struct [project]
   {:compiler omar.defines/cppcompiler
@@ -91,8 +56,28 @@
    :suffix omar.defines/suffix
    })
 
-(defn helper [filename file-extension comp-list]
-  (if (file-match filename file-extension)
-    (my-json (second comp-list) (create-command-str (first comp-list) filename)
-             filename) 
-    nil))
+
+(defn  json-file-logger [bigfilename comp-list]
+   (loop [json-list (my-main comp-list)]
+     (if (empty? json-list) nil
+         (do
+           (generate-stream
+            (first json-list)
+            (clojure.java.io/writer bigfilename :append true))
+             (spit bigfilename ",\n" :append true)
+             (recur (rest json-list))))))
+
+(defn my-main [project ]
+  (loop [
+         file-list (filter #(file-match % ".c" ) (get-file-list (second project)))
+         json-list '()
+         global-struct (create-global-struct project)
+         ]
+    (if (empty? file-list) (filter #(not (nil? %)) json-list)
+        (recur (rest file-list)
+               (cons
+                (my-json project
+                         (create-command-str global-struct (first file-list))
+                         (first file-list))
+                json-list)
+               global-struct))))
