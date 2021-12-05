@@ -37,7 +37,7 @@
          json-list '() ]
     (if (empty? file-list) (filter #(not (nil? %)) json-list)
         (recur (rest file-list)
-               (cons (helper (str (first file-list)) ".c" comp-list)
+               (cons (helper (str (first file-list)) ".cpp" comp-list)
                      json-list)))))
 
  (defn  json-file-logger [bigfilename comp-list]
@@ -46,11 +46,11 @@
          (do (generate-stream (first json-list) (clojure.java.io/writer bigfilename :append true))
              (spit bigfilename ",\n" :append true)
              (recur (rest json-list))))))
-    
+
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (json-file-logger "/home/omar/igor.json" omar.defines/ecobus-commands))
+  (json-file-logger "/home/omar/igor.json" omar.defines/radius-commands))
 
 (-main)
 
