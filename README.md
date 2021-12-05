@@ -4,7 +4,7 @@ You need write all your compile commands in defines.clj command variable (like i
 
 ## Installation
 
-###whit jvm clojure
+### whit jvm clojure
 Download jdk, clojure from clojure site and leiningen
 change command variable and project dir variable
 write 
@@ -12,7 +12,7 @@ $ lein run
 and then you get compile_commands.json file 
 (you need using full path for directories, then you set includes)
 Parsing time is 2-3 minute for very large project, but it ones
-###whit babashka
+### whit babashka
 bb core.clj
 ## Usage
 
