@@ -37,7 +37,7 @@
          json-list '() ]
     (if (empty? file-list) (filter #(not (nil? %)) json-list)
         (recur (rest file-list)
-               (cons (helper (str (first file-list)) ".cpp" comp-list)
+               (cons (helper (str (first file-list)) ".c" comp-list)
                      json-list)))))
 
  (defn  json-file-logger [bigfilename comp-list]
@@ -55,7 +55,7 @@
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (json-file-logger "/home/omar/igor.json" omar.defines/data-plane))
+  (json-file-logger "/home/omar/igor.json" omar.defines/dpdk))
 
 
 
