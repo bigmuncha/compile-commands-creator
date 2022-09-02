@@ -371,6 +371,7 @@
 (def dpdk
   {:arguments
    ["gcc"
+    "-c"
     "-I/home/omar/ecotelecom/dpdk/kernel/linux/kni/"
     "-I/home/omar/ecotelecom/dpdk/kernel/linux/igb_uio/"
     "-I/home/omar/ecotelecom/dpdk/examples/kni/"
@@ -426,6 +427,8 @@
     "-I/home/omar/ecotelecom/dpdk/x86_64-native-linuxapp-gcc/include/generic/"
     "-I/home/omar/ecotelecom/dpdk/examples/skeleton/"
     "-I/home/omar/linux-kernel/include/linux/"
+    "-std=c11"
+    "-o"
    ]
    :directory
    "/home/omar/ecotelecom/dpdk"
